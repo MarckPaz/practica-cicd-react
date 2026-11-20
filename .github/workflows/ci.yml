@@ -1,4 +1,4 @@
-name: React CI
+name: React CI/CD
 
 on:
   push:
@@ -6,10 +6,16 @@ on:
   pull_request:
     branches: [ main ]
 
-jobs:
-  verificar-proyecto:
-    runs-on: ubuntu-latest
+# Permisos necesarios para publicar en GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
+jobs:
+  # TRABAJO 1: Integración Continua (corre en PRs y en main)
+  verificar-y-compilar:
+    runs-on: ubuntu-latest
     steps:
       - name: Descargar codigo
         uses: actions/checkout@v4
@@ -23,8 +29,27 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Revisar codigo con ESLint
+      - name: Revisar codigo
         run: npm run lint
 
-      - name: Compilar aplicacion
+      - name: Compilar proyecto
         run: npm run build
+
+      # Guarda la carpeta dist/ para pasarla al siguiente job
+      - name: Subir artefacto de compilacion
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  # TRABAJO 2: Despliegue Continuo (solo corre cuando se integra a main y pasó el CI)
+  desplegar-produccion:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: verificar-y-compilar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
