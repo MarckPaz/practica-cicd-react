@@ -11,7 +11,7 @@ function App() {
       <p>Despliegue y verificacion automatizada con React y GitHub Actions</p>
       
       <div style={{ marginTop: '2rem' }}>
-        <button 
+        <butto 
           onClick={() => setCount((prev) => prev + 1)}
           style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', cursor: 'pointer' }}
         >
